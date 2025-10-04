@@ -119,7 +119,7 @@
 			LicenseUri = 'https://opensource.org/licenses/MIT'
 			
 			# A URL to the main website for this project.
-			ProjectUri = 'https://github.com/michaelmsonne/Scripts'
+			ProjectUri = 'https://github.com/michaelmsonne/ConditionalAccessManager'
 			
 			# A URL to an icon representing this module.
 			# IconUri = ''
