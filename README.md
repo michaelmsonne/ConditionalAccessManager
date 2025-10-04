@@ -2,8 +2,8 @@
 
 <p align="center">
   <a href="https://www.linkedin.com/in/michaelmsonne/"><img alt="Made by" src="https://img.shields.io/static/v1?label=made%20by&message=Michael%20Morten%20Sonne&color=04D361"></a>
-  <a href="https://github.com/michaelmsonne/ConditionalAccessManager"><img src="https://img.shields.io/github/languages/top/ConditionalAccessManager/GitHubBackupTool.svg"></a>
-  <a href="https://github.com/michaelmsonne/ConditionalAccessManager"><img src="https://img.shields.io/github/languages/code-size/ConditionalAccessManager/GitHubBackupTool.svg"></a>
+  <a href="https://github.com/michaelmsonne/ConditionalAccessManager"><img src="https://img.shields.io/github/languages/top/ConditionalAccessManager/ConditionalAccessManager.svg"></a>
+  <a href="https://github.com/michaelmsonne/ConditionalAccessManager"><img src="https://img.shields.io/github/languages/code-size/ConditionalAccessManager/ConditionalAccessManager.svg"></a>
   <img src="https://visitor-badge.laobi.icu/badge?page_id=michaelmsonne.ConditionalAccessManager.README" alt="Visitors">
   <img src="https://img.shields.io/badge/PowerShell-5.1%2B-blue" alt="PowerShell"></a>
   <img src="https://img.shields.io/badge/Platform-Windows-0078D7" alt="Platform"></a>
