@@ -57,10 +57,10 @@ Outline the file contents of the repository. It helps users navigate the codebas
 | `src`             | Source code.                                |
 | `.gitignore`      | Define what to ignore at commit time.       |
 | `CHANGELOG.md`    | List of changes to the sample.              |
-| `CONTRIBUTING.md` | Guidelines for contributing to the TEMPLATE.|
+| `CONTRIBUTING.md` | Guidelines for contributing to the ConditionalAccessManager.|
 | `README.md`       | This README file.                           |
 | `SECURITY.md`     | This README file.                           |
-| `LICENSE`         | The license for the TEMPLATE.               |
+| `LICENSE`         | The license for the ConditionalAccessManager.               |
 
 ## 🚀 Features
 
@@ -218,7 +218,7 @@ Thanks.
 
 Reach out to the maintainer at one of the following places:
 
-- [GitHub discussions](https://github.com/michaelmsonne/TEMPLATE/discussions)
+- [GitHub discussions](https://github.com/michaelmsonne/ConditionalAccessManager/discussions)
 - The email which is located [in GitHub profile](https://github.com/michaelmsonne)
 
 # 📄 License
