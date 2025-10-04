@@ -1,6 +1,4 @@
-## [1.0.0.0] - XX-XX-XXXX
-Added:
-  -  ..
+# CHANGELOG
 
-Updates:
-  - ..
+## [1.0.0] - 04-10-2025
+First release

@@ -1,14 +1,14 @@
-# TEMPLATE
+# ConditionalAccessManager PowerShell Module
 
 <p align="center">
   <a href="https://www.linkedin.com/in/michaelmsonne/"><img alt="Made by" src="https://img.shields.io/static/v1?label=made%20by&message=Michael%20Morten%20Sonne&color=04D361"></a>
-  <a href="https://github.com/michaelmsonne/TEMPLATE"><img src="https://img.shields.io/github/languages/top/TEMPLATE/GitHubBackupTool.svg"></a>
-  <a href="https://github.com/michaelmsonne/TEMPLATE"><img src="https://img.shields.io/github/languages/code-size/TEMPLATE/GitHubBackupTool.svg"></a>
-  <img src="https://visitor-badge.laobi.icu/badge?page_id=michaelmsonne.TEMPLATE.README" alt="Visitors">
+  <a href="https://github.com/michaelmsonne/ConditionalAccessManager"><img src="https://img.shields.io/github/languages/top/ConditionalAccessManager/GitHubBackupTool.svg"></a>
+  <a href="https://github.com/michaelmsonne/ConditionalAccessManager"><img src="https://img.shields.io/github/languages/code-size/ConditionalAccessManager/GitHubBackupTool.svg"></a>
+  <img src="https://visitor-badge.laobi.icu/badge?page_id=michaelmsonne.ConditionalAccessManager.README" alt="Visitors">
   <img src="https://img.shields.io/badge/PowerShell-5.1%2B-blue" alt="PowerShell"></a>
   <img src="https://img.shields.io/badge/Platform-Windows-0078D7" alt="Platform"></a>
-  <a href="https://github.com/michaelmsonne/TEMPLATE/blob/main/LICENSE.md"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a>
-  <a href="https://github.com/michaelmsonne/TEMPLATE"><img src="https://img.shields.io/github/downloads/michaelmsonne/TEMPLATE/total.svg"></a><br>
+  <a href="https://github.com/michaelmsonne/ConditionalAccessManager/blob/main/LICENSE.md"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a>
+  <a href="https://github.com/michaelmsonne/ConditionalAccessManager"><img src="https://img.shields.io/github/downloads/michaelmsonne/ConditionalAccessManager/total.svg"></a><br>
   <a href="https://www.buymeacoffee.com/sonnes" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 30px !important;width: 117px !important;"></a>
   
 </p>
@@ -17,11 +17,11 @@
 [//]: #https://img.shields.io/badge/PowerShell-5.1%2B-blue
 
 <div align="center">
-  <a href="https://github.com/michaelmsonne/TEMPLATE/issues/new?assignees=&labels=bug&template=01_BUG_REPORT.md&title=bug%3A+">Report a Bug</a>
+  <a href="https://github.com/michaelmsonne/ConditionalAccessManager/issues/new?assignees=&labels=bug&ConditionalAccessManager=01_BUG_REPORT.md&title=bug%3A+">Report a Bug</a>
   ·
-  <a href="https://github.com/michaelmsonne/TEMPLATE/issues/new?assignees=&labels=enhancement&template=02_FEATURE_REQUEST.md&title=feat%3A+">Request a Feature</a>
+  <a href="https://github.com/michaelmsonne/ConditionalAccessManager/issues/new?assignees=&labels=enhancement&ConditionalAccessManager=02_FEATURE_REQUEST.md&title=feat%3A+">Request a Feature</a>
   .
-  <a href="https://github.com/michaelmsonne/TEMPLATE/discussions">Ask a Question</a>
+  <a href="https://github.com/michaelmsonne/ConditionalAccessManager/discussions">Ask a Question</a>
 </div>
 
 <div align="center">
@@ -46,7 +46,7 @@
 - [Credits](#credit)
 
 # Introduction
-This tool.....
+A PowerShell module for managing deleted Conditional Access policies in Microsoft Entra ID using Microsoft Graph API.
 
 ## Contents
 
@@ -64,16 +64,12 @@ Outline the file contents of the repository. It helps users navigate the codebas
 
 ## 🚀 Features
 
-### Overall:
-- Asynchronous resolution for improved performance and responsiveness.
-- Simple and easy-to-use.
+- **List deleted policies** - View all deleted Conditional Access policies
+- **Restore policies** - Restore deleted policies back to active state
+- **Permanently remove policies** - Clean up deleted policies permanently
+- **Export policies** - Backup active and/or deleted policies to JSON
+- **Interactive console** - Menu-driven interface for easy management
 
-### List:
-- Lookup Functionality:
-    The tool provides the ability to
-
-- User Interface:
-    The tool includes a user-friendly graphical interface.
 
 ## Download
 
@@ -81,72 +77,115 @@ Outline the file contents of the repository. It helps users navigate the codebas
 
 [Version History](CHANGELOG.md)
 
-## ⚡ Getting Started
-### 🛠 Prerequisites
-- [.NET Core SDK](https://dotnet.microsoft.com/download) installed on your system.
+## Prerequisites
 
-### Access
+- PowerShell 5.1 or higher
+- Microsoft.Graph PowerShell module
+- Appropriate permissions in Microsoft Entra ID:
+  - `Policy.Read.All` (to read policies)
+  - `Policy.ReadWrite.ConditionalAccess` (to restore/delete policies)
 
-### Installation
-You can either clone this repository and build the project yourself or use the provided installer.
+## Installation
+
+1. Clone or download the module to your PowerShell modules directory
+2. Import the module:
+
+```powershell
+Import-Module .\ConditionalAccessManager
+```
+
+3. Connect to Microsoft Graph:
+
+```powershell
+Connect-MgGraph -Scopes "Policy.Read.All", "Policy.ReadWrite.ConditionalAccess"
+```
 
 ## Usage
 
-```bash
-Tool token-based <token> [<destination>]
+### Interactive Console
+
+Start the interactive menu-driven console:
+
+```powershell
+Start-ConditionalAccessManagerConsole
 ```
 
-etc.: 
-```bash
-Tool token-based <token> [<destination>]
+### Individual Commands
+
+```powershell
+# List deleted policies
+Get-DeletedConditionalAccessPolicies
+
+# List with full details
+Get-DeletedConditionalAccessPolicies -IncludeDetails
+
+# Restore a specific policy
+Restore-ConditionalAccessPolicy -PolicyId "12345678-1234-1234-1234-123456789012"
+
+# Permanently remove a deleted policy
+Remove-DeletedConditionalAccessPolicy -PolicyId "12345678-1234-1234-1234-123456789012" -Force
+
+# Export policies to JSON
+Export-ConditionalAccessPolicies -OutputPath "C:\backup\ca-policies.json" -IncludeActive -IncludeDeleted
 ```
-# 🔧 How to Use
 
-1. **Launch the Tool** as Administrator.
-2. ..
+## Examples
 
-Paramenters:
+### Basic Policy Recovery
 
-- ACCESS_TOKEN: Replace this with your personal access token.
-- -all:
+```powershell
+# Connect to Graph
+Connect-MgGraph
 
-# Final thoughts
-This is not an exhaustive method to retrieve every artifact...
+# List deleted policies
+$deletedPolicies = Get-DeletedConditionalAccessPolicies
+$deletedPolicies | Format-Table
+
+# Restore the first policy
+if ($deletedPolicies.Count -gt 0) {
+    Restore-ConditionalAccessPolicy -PolicyId $deletedPolicies[0].id
+}
+```
+
+### Bulk Operations
+
+```powershell
+# Get all deleted policies and restore them
+Get-DeletedConditionalAccessPolicies | ForEach-Object {
+    Write-Host "Restoring: $($_.displayName)"
+    Restore-ConditionalAccessPolicy -PolicyId $_.id
+}
+```
+
+### Export and Backup
+
+```powershell
+# Create comprehensive backup
+$timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
+Export-ConditionalAccessPolicies -OutputPath ".\CA-Backup-$timestamp.json" -IncludeActive -IncludeDeleted
+```
 
 # 📸 Screenshots
 
-# Email report sample:
-
-**Full layout:**
-
-![Screenshot](docs/email-report-full.png)
-
-**Simpel layout:**
-
-![Screenshot](docs/email-report-simpel.png)
-
-# Console use:
-
-**Help and info menu:**
-
-Main menu:
+# Main menu
 
 ![Screenshot](docs/pictures/help-menu.png)
 
-# 🧪 Testing
+## Error Handling
 
-- Tested on Windows 10 and 11 (Pro & Enterprise)
-- Validated on endpoints joined to AD and Intune
+The module includes comprehensive error handling:
 
-## Building
+- **Authentication errors** - Clear messages when not connected to Graph
+- **Permission errors** - Specific guidance on required scopes
+- **API errors** - Detailed error messages from Graph API
+- **Validation** - Input validation for policy IDs and file paths
 
-```bash
-$ dotnet publish -r win10-x64 -c release
-```
+## Security Considerations
 
-So far I tested the application only for win10-x64 systems, but it might also work on other platforms.
-
-## Used 3rd party libraries for the tool:
+- Always use least-privilege permissions
+- Regularly audit restored policies
+- Keep backups of policy configurations
+- Test in non-production environments first
 
 # Contributing
 If you want to contribute to this project, please open an issue or submit a pull request. I welcome contributions :)
@@ -188,14 +227,3 @@ This project is licensed under the **MIT License** - see the LICENSE file for de
 See [LICENSE](LICENSE) for more information.
 
 # 🙏 Credits
-
-# Sponsors
-## Advanced Installer
-The installer is created from a Free Advanced Installer License for Open-Source from <a href="https://www.advancedinstaller.com/" target="_blank">https://www.advancedinstaller.com/</a> - this allowed me to create a feature complete installer in a user friendly environment with minimal effort - check it out!
-
-[<img src="https://cdn.advancedinstaller.com/svg/pressinfo/AiLogoColor.svg" title="Advanced Installer" alt="Advanced Instzaller" height="120"/>](https://www.advancedinstaller.com/)
-## JetBrains
-JetBrains specialises in intelligent, productivity-enabling tools to help you write clean, quality code across . NET, Java, Ruby, Python, PHP, JavaScript, C# and C++ platforms throughout all stages of development. <a href="https://www.jetbrains.com/" target="_blank">https://www.jetbrains.com/</a> - check it out!
-
-## SAST Tools
-[PVS-Studio](https://pvs-studio.com/en/pvs-studio/?utm_source=github&utm_medium=organic&utm_campaign=open_source) - static analyzer for C, C++, C#, and Java code.
