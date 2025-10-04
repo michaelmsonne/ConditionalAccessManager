@@ -1,4 +1,4 @@
-# ConditionalAccessManager PowerShell Module
+# ConditionalAccessManager
 
 <p align="center">
   <a href="https://www.linkedin.com/in/michaelmsonne/"><img alt="Made by" src="https://img.shields.io/static/v1?label=made%20by&message=Michael%20Morten%20Sonne&color=04D361"></a>
