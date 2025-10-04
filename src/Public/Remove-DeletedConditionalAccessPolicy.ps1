@@ -19,11 +19,11 @@ function Remove-DeletedConditionalAccessPolicy {
     .EXAMPLE
     Remove-DeletedConditionalAccessPolicy -PolicyId "12345678-1234-1234-1234-123456789012" -Force
     #>
+
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
     param(
         [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
         [string]$PolicyId,
-        
         [switch]$Force
     )
     

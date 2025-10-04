@@ -10,6 +10,7 @@ function Start-ConditionalAccessManagerConsole {
     .EXAMPLE
     Start-ConditionalAccessManagerConsole
     #>
+    
     [CmdletBinding()]
     param()
     

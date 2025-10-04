@@ -1,5 +1,4 @@
 # ConditionalAccessManager PowerShell Module
-# Version 2.0.0 - Organized folder structure
 
 # Get public and private function definition files
 $Public = @(Get-ChildItem -Path $PSScriptRoot\Public\*.ps1 -ErrorAction SilentlyContinue)

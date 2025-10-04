@@ -15,6 +15,7 @@ function Restore-ConditionalAccessPolicy {
     .EXAMPLE
     Restore-ConditionalAccessPolicy -PolicyId "12345678-1234-1234-1234-123456789012" -WhatIf
     #>
+    
     [CmdletBinding(SupportsShouldProcess)]
     param(
         [Parameter(Mandatory, ValueFromPipelineByPropertyName)]

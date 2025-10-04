@@ -21,13 +21,12 @@ function Export-ConditionalAccessPolicies {
     .EXAMPLE
     Export-ConditionalAccessPolicies -OutputPath "C:\temp\all-policies.json" -IncludeDeleted -IncludeActive
     #>
+    
     [CmdletBinding()]
     param(
         [Parameter(Mandatory)]
         [string]$OutputPath,
-        
         [switch]$IncludeDeleted,
-        
         [switch]$IncludeActive
     )
     

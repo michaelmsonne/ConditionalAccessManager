@@ -15,6 +15,7 @@ function Get-DeletedConditionalAccessPolicies {
     .EXAMPLE
     Get-DeletedConditionalAccessPolicies -IncludeDetails
     #>
+    
     [CmdletBinding()]
     param(
         [switch]$IncludeDetails
