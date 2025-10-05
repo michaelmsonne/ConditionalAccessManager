@@ -44,7 +44,8 @@ function Export-ConditionalAccessPolicies {
         try {
             if (Test-Path -Path $OutputFolder) {
                 $OutputFolder = Resolve-Path -Path $OutputFolder
-            } else {
+            }
+            else {
                 $OutputFolder = $PSCmdlet.GetUnresolvedProviderPathFromPSPath($OutputFolder)
             }
         }
@@ -61,12 +62,12 @@ function Export-ConditionalAccessPolicies {
         }
         
         $exportSummary = @{
-            ExportDate           = (Get-Date).ToString("yyyy-MM-dd HH:mm:ss")
-            OutputFolder         = $OutputFolder
-            EnabledPoliciesCount = 0
+            ExportDate            = (Get-Date).ToString("yyyy-MM-dd HH:mm:ss")
+            OutputFolder          = $OutputFolder
+            EnabledPoliciesCount  = 0
             DisabledPoliciesCount = 0
-            DeletedPoliciesCount = 0
-            ExportedFiles        = @()
+            DeletedPoliciesCount  = 0
+            ExportedFiles         = @()
         }
         
         # Default to including enabled policies if none are specified
@@ -160,7 +161,8 @@ function Export-ConditionalAccessPolicies {
                         $exportSummary.ExportedFiles += $fileName
                         if ($policy.state -eq "enabled") {
                             $exportSummary.EnabledPoliciesCount++
-                        } else {
+                        }
+                        else {
                             $exportSummary.DisabledPoliciesCount++
                         }
                         

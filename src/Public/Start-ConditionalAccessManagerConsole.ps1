@@ -41,22 +41,23 @@ function Start-ConditionalAccessManagerConsole {
                         
                         # Display basic information in a clean table format
                         $policies | Select-Object @{
-                            Name = 'Policy Name'
+                            Name       = 'Policy Name'
                             Expression = { $_.DisplayName }
                         }, @{
-                            Name = 'State'
+                            Name       = 'State'
                             Expression = { $_.State }
                         }, @{
-                            Name = 'Deleted Date'
+                            Name       = 'Deleted Date'
                             Expression = { 
                                 if ($_.deletedDateTime) {
                                     [DateTime]$_.deletedDateTime | Get-Date -Format "yyyy-MM-dd HH:mm"
-                                } elseif ($_.DeletedDateTime) {
+                                }
+                                elseif ($_.DeletedDateTime) {
                                     [DateTime]$_.DeletedDateTime | Get-Date -Format "yyyy-MM-dd HH:mm"
                                 }
                             }
                         }, @{
-                            Name = 'Policy ID'
+                            Name       = 'Policy ID'
                             Expression = { $_.Id }
                         } | Format-Table -AutoSize
                     }
@@ -109,7 +110,8 @@ function Start-ConditionalAccessManagerConsole {
                                 if ($cond.devices) { Write-Host "  Devices: Configured" }
                                 if ($cond.signInRiskLevels) { Write-Host "  Sign-in Risk: $($cond.signInRiskLevels -join ', ')" }
                                 if ($cond.userRiskLevels) { Write-Host "  User Risk: $($cond.userRiskLevels -join ', ')" }
-                            } else {
+                            }
+                            else {
                                 Write-Host "  None configured"
                             }
                             
@@ -122,7 +124,8 @@ function Start-ConditionalAccessManagerConsole {
                                 if ($gc.customAuthenticationFactors) { Write-Host "  Custom Auth Factors: $($gc.customAuthenticationFactors -join ', ')" }
                                 if ($gc.termsOfUse) { Write-Host "  Terms of Use: $($gc.termsOfUse -join ', ')" }
                                 if ($gc.authenticationStrength) { Write-Host "  Auth Strength: Configured" }
-                            } else {
+                            }
+                            else {
                                 Write-Host "  None configured"
                             }
                             
@@ -134,7 +137,8 @@ function Start-ConditionalAccessManagerConsole {
                                 if ($sc.cloudAppSecurity) { Write-Host "  Cloud App Security: Configured" }
                                 if ($sc.persistentBrowser) { Write-Host "  Persistent Browser: Configured" }
                                 if ($sc.signInFrequency) { Write-Host "  Sign-in Frequency: Configured" }
-                            } else {
+                            }
+                            else {
                                 Write-Host "  None configured"
                             }
                         }
@@ -166,10 +170,10 @@ function Start-ConditionalAccessManagerConsole {
                         $indexedPolicies = @()
                         for ($i = 0; $i -lt $Data.Count; $i++) {
                             $indexedPolicies += [PSCustomObject]@{
-                                Index = $i + 1
+                                Index       = $i + 1
                                 DisplayName = $Data[$i].displayName
-                                Id = $Data[$i].id
-                                State = $Data[$i].state
+                                Id          = $Data[$i].id
+                                State       = $Data[$i].state
                             }
                         }
                         
@@ -226,10 +230,10 @@ function Start-ConditionalAccessManagerConsole {
                         $indexedPolicies = @()
                         for ($i = 0; $i -lt $Data.Count; $i++) {
                             $indexedPolicies += [PSCustomObject]@{
-                                Index = $i + 1
+                                Index       = $i + 1
                                 DisplayName = $Data[$i].displayName
-                                Id = $Data[$i].id
-                                State = $Data[$i].state
+                                Id          = $Data[$i].id
+                                State       = $Data[$i].state
                             }
                         }
                         
@@ -316,14 +320,14 @@ function Start-ConditionalAccessManagerConsole {
                         # Group scopes for better readability
                         $scopes = $context.Scopes | Sort-Object
                         $groupedScopes = @{
-                            'Policy' = @()
-                            'Directory' = @()
-                            'User' = @()
-                            'Device' = @()
-                            'Group' = @()
+                            'Policy'      = @()
+                            'Directory'   = @()
+                            'User'        = @()
+                            'Device'      = @()
+                            'Group'       = @()
                             'Application' = @()
-                            'Reports' = @()
-                            'Other' = @()
+                            'Reports'     = @()
+                            'Other'       = @()
                         }
                         
                         foreach ($scope in $scopes) {

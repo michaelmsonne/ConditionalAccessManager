@@ -47,14 +47,16 @@ function Get-DeletedConditionalAccessPolicies {
                     if (-not $obj) { return $null }
                     try {
                         if ($obj.PSObject.Properties.Match($name)) { return $obj.$name }
-                    } catch { }
+                    }
+                    catch { }
                     try {
                         if ($obj.AdditionalProperties -and $obj.AdditionalProperties.ContainsKey($name)) { return $obj.AdditionalProperties[$name] }
-                    } catch { }
+                    }
+                    catch { }
                     return $null
                 }
 
-                return $policies | Select-Object @{Name='DisplayName';Expression={ & $getProp $_ 'displayName' }}, @{Name='State';Expression={ & $getProp $_ 'state' }}, @{Name='Id';Expression={ & $getProp $_ 'id' }}, @{Name='DeletedDateTime';Expression={ & $getProp $_ 'deletedDateTime' }}
+                return $policies | Select-Object @{Name = 'DisplayName'; Expression = { & $getProp $_ 'displayName' } }, @{Name = 'State'; Expression = { & $getProp $_ 'state' } }, @{Name = 'Id'; Expression = { & $getProp $_ 'id' } }, @{Name = 'DeletedDateTime'; Expression = { & $getProp $_ 'deletedDateTime' } }
             }
         }
         else {

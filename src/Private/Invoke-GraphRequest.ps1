@@ -42,7 +42,7 @@ function Invoke-GraphRequest {
     try {
         $requestParams = @{
             Method = $Method
-            Uri = $Uri
+            Uri    = $Uri
         }
         
         if ($Body) {
