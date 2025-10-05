@@ -193,7 +193,7 @@ The module creates well-organized exports for easy management:
 ### File Structure
 ```
 CA-Policies-Export-20251005-123456/
-├── _ExportSummary.json                              # Export metadata and counts
+├── _ExportSummary.json                            # Export metadata and counts
 ├── Policy_Name_Here_12345678-abcd-efgh.json       # Enabled policies
 ├── Another_Policy_87654321-wxyz-1234.json         # Enabled policies  
 ├── DELETED_Test_Policy_11111111-dddd-eeee.json    # Deleted policies (prefixed)
