@@ -1,6 +1,6 @@
 # Example: Basic Usage
 
-Import-Module .\ConditionalAccessManager.psm1
+Import-Module .\ConditionalAccessManager.psm1 -Force
 
 # Connect to Microsoft Graph
 Connect-MgGraph -Scopes "Policy.Read.All", "Policy.ReadWrite.ConditionalAccess"

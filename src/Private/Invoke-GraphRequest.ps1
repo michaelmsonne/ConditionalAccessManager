@@ -21,15 +21,13 @@ function Invoke-GraphRequest {
     .EXAMPLE
     Invoke-GraphRequest -Uri "https://graph.microsoft.com/v1.0/me" -Method GET
     #>
+    
     [CmdletBinding()]
     param(
         [Parameter(Mandatory)]
-        [string]$Uri,
-        
-        [string]$Method = 'GET',
-        
-        [object]$Body,
-        
+        [string]$Uri,        
+        [string]$Method = 'GET',        
+        [object]$Body,        
         [switch]$Beta
     )
     
