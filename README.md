@@ -219,8 +219,8 @@ The module includes comprehensive error handling and resilience:
 
 - **Authentication errors** - Clear messages when not connected to Graph with automatic connection prompts
 - **Permission errors** - Specific guidance on required scopes with validation
-- **API throttling** - Built-in retry logic for 429 "Too Many Requests" with exponential backoff (to-do)
-- **Rate limiting** - Respects Retry-After headers and implements jitter for optimal performance (to-do)
+- **API throttling** - Built-in retry logic for 429 "Too Many Requests" with exponential backoff
+- **Rate limiting** - Respects Retry-After headers and implements jitter for optimal performance
 - **API errors** - Detailed error messages from Graph API with context (to-do)
 - **Validation** - Input validation for policy IDs, file paths, and folder structures
 - **Resilient exports** - Individual file failures don't stop entire export process

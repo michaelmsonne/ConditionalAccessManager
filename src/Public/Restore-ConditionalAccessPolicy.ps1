@@ -32,7 +32,7 @@ function Restore-ConditionalAccessPolicy {
         
         # First verify the policy exists in deleted items
         $uri = "https://graph.microsoft.com/beta/identity/conditionalAccess/deletedItems/policies/$PolicyId"
-        $deletedPolicy = Invoke-MgGraphRequest -Uri $uri -Method GET
+        $deletedPolicy = Invoke-GraphRequest -Uri $uri -Method GET
         
         if (-not $deletedPolicy) {
             Write-Error "Policy with ID $PolicyId not found in deleted items"
@@ -51,7 +51,7 @@ function Restore-ConditionalAccessPolicy {
             $restoreUri = "https://graph.microsoft.com/beta/identity/conditionalAccess/deletedItems/policies/$PolicyId/restore"
             
             # No request body required according to documentation
-            $response = Invoke-MgGraphRequest -Uri $restoreUri -Method POST
+            $response = Invoke-GraphRequest -Uri $restoreUri -Method POST
             
             Write-Host "Successfully restored policy: $($deletedPolicy.displayName)" -ForegroundColor Green
             return $response

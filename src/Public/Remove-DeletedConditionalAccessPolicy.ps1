@@ -32,10 +32,10 @@ function Remove-DeletedConditionalAccessPolicy {
         if (-not (Test-GraphAuthentication)) {
             return
         }
-        
+
         # First verify the policy exists in deleted items
         $uri = "https://graph.microsoft.com/beta/identity/conditionalAccess/deletedItems/policies/$PolicyId"
-        $deletedPolicy = Invoke-MgGraphRequest -Uri $uri -Method GET
+        $deletedPolicy = Invoke-GraphRequest -Uri $uri -Method GET
         
         if (-not $deletedPolicy) {
             Write-Error "Policy with ID $PolicyId not found in deleted items"
@@ -50,7 +50,7 @@ function Remove-DeletedConditionalAccessPolicy {
         }
         
         if ($Force -or $PSCmdlet.ShouldProcess($deletedPolicy.displayName, "Permanently Remove Conditional Access Policy")) {
-            $response = Invoke-MgGraphRequest -Uri $uri -Method DELETE
+            $response = Invoke-GraphRequest -Uri $uri -Method DELETE
             
             Write-Host "Successfully removed policy: $($deletedPolicy.displayName)" -ForegroundColor Green
             return $response

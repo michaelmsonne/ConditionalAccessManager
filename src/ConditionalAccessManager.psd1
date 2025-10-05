@@ -33,7 +33,7 @@
 	Copyright = '(c) 2025 Michael Morten Sonne. All rights reserved.'
 	
 	# Description of the functionality provided by this module
-	Description = 'PowerShell module for managing deleted Conditional Access policies in Microsoft Entra ID using Microsoft Graph API.'
+	Description = 'PowerShell module for managing Conditional Access policies in Microsoft Entra ID using Microsoft Graph API.'
 	
 	# Supported PSEditions
 	# CompatiblePSEditions = @('Core', 'Desktop')
@@ -125,7 +125,7 @@
 			# IconUri = ''
 			
 			# ReleaseNotes of this module
-			ReleaseNotes = 'v2.0.0 - Organized folder structure with Private/Public separation, comprehensive testing, and improved Graph API integration'
+			# ReleaseNotes = 'v1.0.0 - Organized folder structure with Private/Public separation, comprehensive testing, and improved Graph API integration'
 			
 		} # End of PSData hashtable
 		
