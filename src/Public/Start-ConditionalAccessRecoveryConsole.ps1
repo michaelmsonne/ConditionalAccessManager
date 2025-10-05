@@ -295,22 +295,65 @@ function Start-ConditionalAccessManagerConsole {
             
             "6" {
                 Write-Host "`nAuthentication Status" -ForegroundColor Yellow
+                Write-Host "==================================================" -ForegroundColor Gray
                 try {
                     $context = Get-MgContext
                     if ($context) {
+                        Write-Host "Status:   " -NoNewline -ForegroundColor White
                         Write-Host "Connected to Microsoft Graph" -ForegroundColor Green
-                        Write-Host "Account: $($context.Account)"
-                        Write-Host "Tenant: $($context.TenantId)"
-                        Write-Host "Scopes: $($context.Scopes -join ', ')"
+                        Write-Host "Account:  " -NoNewline -ForegroundColor White
+                        Write-Host "$($context.Account)" -ForegroundColor Cyan
+                        Write-Host "Tenant:   " -NoNewline -ForegroundColor White
+                        Write-Host "$($context.TenantId)" -ForegroundColor Cyan
+                        Write-Host ""
+                        Write-Host "Scopes:" -ForegroundColor White
+                        Write-Host "------------------------------" -ForegroundColor Gray
+                        
+                        # Group scopes for better readability
+                        $scopes = $context.Scopes | Sort-Object
+                        $groupedScopes = @{
+                            'Policy' = @()
+                            'Directory' = @()
+                            'User' = @()
+                            'Device' = @()
+                            'Group' = @()
+                            'Application' = @()
+                            'Reports' = @()
+                            'Other' = @()
+                        }
+                        
+                        foreach ($scope in $scopes) {
+                            if ($scope -like "Policy.*") { $groupedScopes['Policy'] += $scope }
+                            elseif ($scope -like "Directory.*") { $groupedScopes['Directory'] += $scope }
+                            elseif ($scope -like "User.*") { $groupedScopes['User'] += $scope }
+                            elseif ($scope -like "Device*") { $groupedScopes['Device'] += $scope }
+                            elseif ($scope -like "Group.*") { $groupedScopes['Group'] += $scope }
+                            elseif ($scope -like "Application.*") { $groupedScopes['Application'] += $scope }
+                            elseif ($scope -like "Reports.*") { $groupedScopes['Reports'] += $scope }
+                            else { $groupedScopes['Other'] += $scope }
+                        }
+                        
+                        foreach ($category in $groupedScopes.Keys | Sort-Object) {
+                            if ($groupedScopes[$category].Count -gt 0) {
+                                Write-Host "$category Permissions:" -ForegroundColor Yellow
+                                foreach ($scope in $groupedScopes[$category]) {
+                                    Write-Host "  - $scope" -ForegroundColor Gray
+                                }
+                                Write-Host ""
+                            }
+                        }
                     }
                     else {
+                        Write-Host "Status:   " -NoNewline -ForegroundColor White
                         Write-Host "Not connected to Microsoft Graph" -ForegroundColor Red
-                        Write-Host "Use Connect-MgGraph to authenticate"
+                        Write-Host ""
+                        Write-Host "Use Connect-MgGraph to authenticate" -ForegroundColor Yellow
                     }
                 }
                 catch {
                     Write-Host "Error checking authentication: $($_.Exception.Message)" -ForegroundColor Red
                 }
+                Write-Host "==================================================" -ForegroundColor Gray
             }
             
             "0" {
