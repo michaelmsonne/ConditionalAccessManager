@@ -182,9 +182,13 @@ Export-ConditionalAccessPolicies -OutputFolder ".\Deleted-Audit-$timestamp" -Inc
 
 # 📸 Screenshots
 
-# Main menu
+# Main menu UI
 
-![Screenshot](docs/pictures/help-menu.png)
+![Screenshot](docs/pictures/ConsoleUI.png)
+
+# Restore UI
+
+![Screenshot](docs/pictures/ConsoleUI-RestoreCA.png)
 
 ## Export File Organization
 
