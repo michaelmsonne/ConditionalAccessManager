@@ -12,8 +12,11 @@ function Export-ConditionalAccessPolicies {
     .PARAMETER IncludeDeleted
     Include deleted policies in the export
     
-    .PARAMETER IncludeActive
-    Include active policies in the export (default: true)
+    .PARAMETER IncludeEnabled
+    Include enabled policies in the export (default: true)
+    
+    .PARAMETER IncludeDisabled
+    Include disabled policies in the export (default: false)
     
     .EXAMPLE
     Export-ConditionalAccessPolicies -OutputFolder "C:\temp\ca-policies"
@@ -27,7 +30,8 @@ function Export-ConditionalAccessPolicies {
         [Parameter(Mandatory)]
         [string]$OutputFolder,
         [switch]$IncludeDeleted,
-        [switch]$IncludeActive
+        [switch]$IncludeEnabled,
+        [switch]$IncludeDisabled
     )
     
     try {
@@ -59,14 +63,15 @@ function Export-ConditionalAccessPolicies {
         $exportSummary = @{
             ExportDate           = (Get-Date).ToString("yyyy-MM-dd HH:mm:ss")
             OutputFolder         = $OutputFolder
-            PoliciesCount        = 0
+            EnabledPoliciesCount = 0
+            DisabledPoliciesCount = 0
             DeletedPoliciesCount = 0
             ExportedFiles        = @()
         }
         
-        # Default to including active policies if neither is specified
-        if (-not $IncludeDeleted -and -not $IncludeActive) {
-            $IncludeActive = $true
+        # Default to including enabled policies if none are specified
+        if (-not $IncludeDeleted -and -not $IncludeEnabled -and -not $IncludeDisabled) {
+            $IncludeEnabled = $true
         }
         
         # Function to sanitize filename
@@ -96,15 +101,37 @@ function Export-ConditionalAccessPolicies {
             return $safeName
         }
         
-        if ($IncludeActive) {
+        if ($IncludeEnabled -or $IncludeDisabled) {
             Write-Host "Retrieving Conditional Access policies..." -ForegroundColor Yellow
             $activeUri = "https://graph.microsoft.com/beta/identity/conditionalAccess/policies"
             $activeResponse = Invoke-GraphRequest -Uri $activeUri -Method GET
             
             if ($activeResponse.value) {
-                Write-Host "Found $($activeResponse.value.Count) policies" -ForegroundColor Green
+                # Filter policies by state
+                $policiesToExport = @()
+                $enabledCount = 0
+                $disabledCount = 0
                 
                 foreach ($policy in $activeResponse.value) {
+                    $shouldInclude = $false
+                    
+                    if ($policy.state -eq "enabled" -and $IncludeEnabled) {
+                        $shouldInclude = $true
+                        $enabledCount++
+                    }
+                    elseif (($policy.state -eq "disabled" -or $policy.state -eq "enabledForReportingButNotEnforced") -and $IncludeDisabled) {
+                        $shouldInclude = $true
+                        $disabledCount++
+                    }
+                    
+                    if ($shouldInclude) {
+                        $policiesToExport += $policy
+                    }
+                }
+                
+                Write-Host "Found $enabledCount enabled and $disabledCount disabled policies (exporting $($policiesToExport.Count))" -ForegroundColor Green
+                
+                foreach ($policy in $policiesToExport) {
                     try {
                         $safeDisplayName = Get-SafeFileName -Name $policy.displayName
                         $fileName = "$($safeDisplayName)_$($policy.id).json"
@@ -120,9 +147,10 @@ function Export-ConditionalAccessPolicies {
                             throw "Directory does not exist: $directory"
                         }
                         
+                        $policyType = if ($policy.state -eq "enabled") { "Enabled" } else { "Disabled" }
                         $policyData = @{
                             ExportDate = $exportSummary.ExportDate
-                            PolicyType = "All"
+                            PolicyType = $policyType
                             Policy     = $policy
                         }
                         
@@ -130,7 +158,11 @@ function Export-ConditionalAccessPolicies {
                         $jsonOutput | Out-File -FilePath $filePath -Encoding UTF8 -Force
                         
                         $exportSummary.ExportedFiles += $fileName
-                        $exportSummary.PoliciesCount++
+                        if ($policy.state -eq "enabled") {
+                            $exportSummary.EnabledPoliciesCount++
+                        } else {
+                            $exportSummary.DisabledPoliciesCount++
+                        }
                         
                         Write-Host "  Exported: $fileName" -ForegroundColor Gray
                     }
@@ -215,7 +247,8 @@ function Export-ConditionalAccessPolicies {
         
         Write-Host "`nExport completed successfully!" -ForegroundColor Green
         Write-Host "Output folder: $OutputFolder" -ForegroundColor Cyan
-        Write-Host "Total policies: $($exportSummary.PoliciesCount)" -ForegroundColor Cyan
+        Write-Host "Enabled policies: $($exportSummary.EnabledPoliciesCount)" -ForegroundColor Cyan
+        Write-Host "Disabled policies: $($exportSummary.DisabledPoliciesCount)" -ForegroundColor Cyan
         Write-Host "Deleted policies: $($exportSummary.DeletedPoliciesCount)" -ForegroundColor Cyan
         Write-Host "Total files: $($exportSummary.ExportedFiles.Count + 1) (including summary)" -ForegroundColor Cyan
         

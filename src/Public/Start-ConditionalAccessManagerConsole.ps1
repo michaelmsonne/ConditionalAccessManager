@@ -275,17 +275,20 @@ function Start-ConditionalAccessManagerConsole {
                         $outputPath = $defaultPath
                     }
                     
-                    $includeActive = Read-Host "Include active policies? (Y/n)"
+                    $includeEnabled = Read-Host "Include enabled policies? (Y/n)"
+                    $includeDisabled = Read-Host "Include disabled policies? (Y/n)"
                     $includeDeleted = Read-Host "Include deleted policies? (Y/n)"
                     
                     $params = @{ OutputFolder = $outputPath }
-                    if ($includeActive -ne 'n') { $params.IncludeActive = $true }
+                    if ($includeEnabled -ne 'n') { $params.IncludeEnabled = $true }
+                    if ($includeDisabled -ne 'n') { $params.IncludeDisabled = $true }
                     if ($includeDeleted -ne 'n') { $params.IncludeDeleted = $true }
                     
                     $result = Export-ConditionalAccessPolicies @params -Verbose
                     Write-Host "Export completed:" -ForegroundColor Green
                     Write-Host "  Folder: $($result.OutputFolder)"
-                    Write-Host "  Total policies: $($result.PoliciesCount)"
+                    Write-Host "  Enabled policies: $($result.EnabledPoliciesCount)"
+                    Write-Host "  Disabled policies: $($result.DisabledPoliciesCount)"
                     Write-Host "  Deleted policies: $($result.DeletedPoliciesCount)"
                     Write-Host "  Total files: $($result.ExportedFiles.Count + 1) (including summary)"
                 }
