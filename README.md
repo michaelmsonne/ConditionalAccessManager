@@ -64,11 +64,17 @@ Outline the file contents of the repository. It helps users navigate the codebas
 
 ## 🚀 Features
 
-- **List deleted policies** - View all deleted Conditional Access policies
-- **Restore policies** - Restore deleted policies back to active state
-- **Permanently remove policies** - Clean up deleted policies permanently
-- **Export policies** - Backup active and/or deleted policies to JSON
-- **Interactive console** - Menu-driven interface for easy management
+- **List deleted policies** - View all deleted Conditional Access policies with clean formatting
+- **Restore policies** - Restore deleted policies back to enabled state with confirmation
+- **Permanently remove policies** - Clean up deleted policies permanently with safety prompts
+- **Advanced export** - Export policies to individual JSON files with state filtering
+  - Export enabled policies only
+  - Export disabled policies only
+  - Export deleted policies with special naming
+  - Organize exports in folders with summary files
+- **Retry logic** - Built-in 429 throttling and error handling with exponential backoff
+- **Interactive console** - Enhanced menu-driven interface with better formatting
+- **Automatic authentication** - Smart connection management with scope validation
 
 
 ## Download
@@ -113,7 +119,7 @@ Start-ConditionalAccessManagerConsole
 ### Individual Commands
 
 ```powershell
-# List deleted policies
+# List deleted policies (clean table format)
 Get-DeletedConditionalAccessPolicies
 
 # List with full details
@@ -125,8 +131,11 @@ Restore-ConditionalAccessPolicy -PolicyId "12345678-1234-1234-1234-123456789012"
 # Permanently remove a deleted policy
 Remove-DeletedConditionalAccessPolicy -PolicyId "12345678-1234-1234-1234-123456789012" -Force
 
-# Export policies to JSON
-Export-ConditionalAccessPolicies -OutputPath "C:\backup\ca-policies.json" -IncludeActive -IncludeDeleted
+# Export to individual JSON files with state filtering
+Export-ConditionalAccessPolicies -OutputFolder "C:\backup\ca-policies" -IncludeEnabled -IncludeDisabled -IncludeDeleted
+
+# Start the interactive console
+Start-ConditionalAccessManagerConsole
 ```
 
 ## Examples
@@ -160,9 +169,15 @@ Get-DeletedConditionalAccessPolicies | ForEach-Object {
 ### Export and Backup
 
 ```powershell
-# Create comprehensive backup
+# Create comprehensive backup with individual files
 $timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
-Export-ConditionalAccessPolicies -OutputPath ".\CA-Backup-$timestamp.json" -IncludeActive -IncludeDeleted
+Export-ConditionalAccessPolicies -OutputFolder ".\CA-Backup-$timestamp" -IncludeEnabled -IncludeDisabled -IncludeDeleted
+
+# Export only production policies (enabled)
+Export-ConditionalAccessPolicies -OutputFolder ".\Production-Policies-$timestamp" -IncludeEnabled
+
+# Export deleted policies for audit
+Export-ConditionalAccessPolicies -OutputFolder ".\Deleted-Audit-$timestamp" -IncludeDeleted
 ```
 
 # 📸 Screenshots
@@ -171,14 +186,44 @@ Export-ConditionalAccessPolicies -OutputPath ".\CA-Backup-$timestamp.json" -Incl
 
 ![Screenshot](docs/pictures/help-menu.png)
 
+## Export File Organization
+
+The module creates well-organized exports for easy management:
+
+### File Structure
+```
+CA-Policies-Export-20251005-123456/
+├── _ExportSummary.json                              # Export metadata and counts
+├── Policy_Name_Here_12345678-abcd-efgh.json       # Enabled policies
+├── Another_Policy_87654321-wxyz-1234.json         # Enabled policies  
+├── DELETED_Test_Policy_11111111-dddd-eeee.json    # Deleted policies (prefixed)
+└── ...
+```
+
+### File Naming Convention
+- **Enabled/Disabled policies**: `PolicyName_PolicyID.json`
+- **Deleted policies**: `DELETED_PolicyName_PolicyID.json`
+- **Special characters**: Automatically sanitized for filesystem compatibility
+- **Summary file**: `_ExportSummary.json` with export statistics
+
+### File Contents
+Each policy file contains:
+- Export timestamp
+- Policy type (Enabled/Disabled/Deleted)
+- Complete policy configuration
+- All conditions, grant controls, and session controls
+
 ## Error Handling
 
-The module includes comprehensive error handling:
+The module includes comprehensive error handling and resilience:
 
-- **Authentication errors** - Clear messages when not connected to Graph
-- **Permission errors** - Specific guidance on required scopes
-- **API errors** - Detailed error messages from Graph API
-- **Validation** - Input validation for policy IDs and file paths
+- **Authentication errors** - Clear messages when not connected to Graph with automatic connection prompts
+- **Permission errors** - Specific guidance on required scopes with validation
+- **API throttling** - Built-in retry logic for 429 "Too Many Requests" with exponential backoff (to-do)
+- **Rate limiting** - Respects Retry-After headers and implements jitter for optimal performance (to-do)
+- **API errors** - Detailed error messages from Graph API with context (to-do)
+- **Validation** - Input validation for policy IDs, file paths, and folder structures
+- **Resilient exports** - Individual file failures don't stop entire export process
 
 ## Security Considerations
 
@@ -186,6 +231,8 @@ The module includes comprehensive error handling:
 - Regularly audit restored policies
 - Keep backups of policy configurations
 - Test in non-production environments first
+- Review exported files before sharing (may contain sensitive configuration data)
+- Use secure storage for exported policy files
 
 # Contributing
 If you want to contribute to this project, please open an issue or submit a pull request. I welcome contributions :)
