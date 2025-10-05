@@ -1,4 +1,5 @@
 function Restore-ConditionalAccessPolicy {
+
     <#
     .SYNOPSIS
     Restores a deleted Conditional Access policy
@@ -23,6 +24,12 @@ function Restore-ConditionalAccessPolicy {
     )
     
     try {
+
+        # Check authentication and connect if needed
+        if (-not (Test-GraphAuthentication)) {
+            return
+        }
+        
         # First verify the policy exists in deleted items
         $uri = "https://graph.microsoft.com/beta/identity/conditionalAccess/deletedItems/policies/$PolicyId"
         $deletedPolicy = Invoke-MgGraphRequest -Uri $uri -Method GET

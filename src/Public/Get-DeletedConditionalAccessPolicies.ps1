@@ -24,25 +24,41 @@ function Get-DeletedConditionalAccessPolicies {
     try {
         Write-Verbose "Retrieving deleted Conditional Access policies..."
         
+        # Check authentication and connect if needed
+        if (-not (Test-GraphAuthentication)) {
+            return @()
+        }
+        
         $uri = "https://graph.microsoft.com/beta/identity/conditionalAccess/deletedItems/policies"
-        $response = Invoke-MgGraphRequest -Uri $uri -Method GET
+        # Use centralized helper which includes retry logic and beta handling
+        $response = Invoke-GraphRequest -Uri $uri -Method GET
         
         if ($response.value) {
             $policies = $response.value
-            Write-Host "Found $($policies.Count) deleted Conditional Access policies" -ForegroundColor Green
+            Write-Verbose "Found $($policies.Count) deleted Conditional Access policies"
             
             if ($IncludeDetails) {
                 return $policies
             }
             else {
-                return $policies | Select-Object id, displayName, deletedDateTime, 
-                @{Name = 'State'; Expression = { $_.state } },
-                @{Name = 'CreatedBy'; Expression = { $_.createdBy.displayName } },
-                @{Name = 'ModifiedBy'; Expression = { $_.modifiedBy.displayName } }
+                # Helper to read a property from the object, falling back to AdditionalProperties (SDK models)
+                $getProp = {
+                    param($obj, $name)
+                    if (-not $obj) { return $null }
+                    try {
+                        if ($obj.PSObject.Properties.Match($name)) { return $obj.$name }
+                    } catch { }
+                    try {
+                        if ($obj.AdditionalProperties -and $obj.AdditionalProperties.ContainsKey($name)) { return $obj.AdditionalProperties[$name] }
+                    } catch { }
+                    return $null
+                }
+
+                return $policies | Select-Object @{Name='DisplayName';Expression={ & $getProp $_ 'displayName' }}, @{Name='State';Expression={ & $getProp $_ 'state' }}, @{Name='Id';Expression={ & $getProp $_ 'id' }}, @{Name='DeletedDateTime';Expression={ & $getProp $_ 'deletedDateTime' }}
             }
         }
         else {
-            Write-Host "No deleted Conditional Access policies found" -ForegroundColor Yellow
+            Write-Verbose "No deleted Conditional Access policies found"
             return @()
         }
     }

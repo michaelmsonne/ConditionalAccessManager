@@ -31,6 +31,11 @@ function Export-ConditionalAccessPolicies {
     )
     
     try {
+        # Check authentication and connect if needed
+        if (-not (Test-GraphAuthentication)) {
+            return
+        }
+        
         $exportData = @{
             ExportDate      = (Get-Date).ToString("yyyy-MM-dd HH:mm:ss")
             ActivePolicies  = @()

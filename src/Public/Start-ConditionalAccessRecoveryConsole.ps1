@@ -36,7 +36,32 @@ function Start-ConditionalAccessManagerConsole {
                 try {
                     $policies = Get-DeletedConditionalAccessPolicies
                     if ($policies) {
-                        $policies | Format-Table -AutoSize
+                        Write-Host "`nFound $(@($policies).Count) deleted Conditional Access policies" -ForegroundColor Green
+                        Write-Host ""
+                        
+                        # Display basic information in a clean table format
+                        $policies | Select-Object @{
+                            Name = 'Policy Name'
+                            Expression = { $_.DisplayName }
+                        }, @{
+                            Name = 'State'
+                            Expression = { $_.State }
+                        }, @{
+                            Name = 'Deleted Date'
+                            Expression = { 
+                                if ($_.deletedDateTime) {
+                                    [DateTime]$_.deletedDateTime | Get-Date -Format "yyyy-MM-dd HH:mm"
+                                } elseif ($_.DeletedDateTime) {
+                                    [DateTime]$_.DeletedDateTime | Get-Date -Format "yyyy-MM-dd HH:mm"
+                                }
+                            }
+                        }, @{
+                            Name = 'Policy ID'
+                            Expression = { $_.Id }
+                        } | Format-Table -AutoSize
+                    }
+                    else {
+                        Write-Host "`nNo deleted Conditional Access policies found" -ForegroundColor Yellow
                     }
                 }
                 catch {
@@ -53,9 +78,65 @@ function Start-ConditionalAccessManagerConsole {
                             Write-Host "`n--- $($policy.displayName) ---" -ForegroundColor Green
                             Write-Host "ID: $($policy.id)"
                             Write-Host "State: $($policy.state)"
-                            Write-Host "Deleted: $($policy.deletedDateTime)"
                             Write-Host "Created: $($policy.createdDateTime)"
                             Write-Host "Modified: $($policy.modifiedDateTime)"
+                            Write-Host "Deleted: $($policy.deletedDateTime)"
+                            
+                            # Format Conditions summary
+                            Write-Host "`nConditions:" -ForegroundColor Cyan
+                            if ($policy.conditions) {
+                                $cond = $policy.conditions
+                                if ($cond.clientAppTypes) { Write-Host "  Client App Types: $($cond.clientAppTypes -join ', ')" }
+                                if ($cond.applications -and $cond.applications.includeApplications) { 
+                                    Write-Host "  Include Applications: $($cond.applications.includeApplications -join ', ')" 
+                                }
+                                if ($cond.applications -and $cond.applications.excludeApplications) { 
+                                    Write-Host "  Exclude Applications: $($cond.applications.excludeApplications -join ', ')" 
+                                }
+                                if ($cond.users) {
+                                    if ($cond.users.includeUsers) { Write-Host "  Include Users: $($cond.users.includeUsers -join ', ')" }
+                                    if ($cond.users.excludeUsers) { Write-Host "  Exclude Users: $($cond.users.excludeUsers -join ', ')" }
+                                    if ($cond.users.includeGroups) { Write-Host "  Include Groups: $($cond.users.includeGroups -join ', ')" }
+                                    if ($cond.users.excludeGroups) { Write-Host "  Exclude Groups: $($cond.users.excludeGroups -join ', ')" }
+                                    if ($cond.users.includeRoles) { Write-Host "  Include Roles: $($cond.users.includeRoles -join ', ')" }
+                                    if ($cond.users.excludeRoles) { Write-Host "  Exclude Roles: $($cond.users.excludeRoles -join ', ')" }
+                                    if ($cond.users.includeGuestsOrExternalUsers) { 
+                                        Write-Host "  Include External Users: $($cond.users.includeGuestsOrExternalUsers.guestOrExternalUserTypes)" 
+                                    }
+                                }
+                                if ($cond.locations) { Write-Host "  Locations: Configured" }
+                                if ($cond.platforms) { Write-Host "  Platforms: Configured" }
+                                if ($cond.devices) { Write-Host "  Devices: Configured" }
+                                if ($cond.signInRiskLevels) { Write-Host "  Sign-in Risk: $($cond.signInRiskLevels -join ', ')" }
+                                if ($cond.userRiskLevels) { Write-Host "  User Risk: $($cond.userRiskLevels -join ', ')" }
+                            } else {
+                                Write-Host "  None configured"
+                            }
+                            
+                            # Format Grant Controls summary
+                            Write-Host "`nGrant Controls:" -ForegroundColor Cyan
+                            if ($policy.grantControls) {
+                                $gc = $policy.grantControls
+                                if ($gc.operator) { Write-Host "  Operator: $($gc.operator)" }
+                                if ($gc.builtInControls) { Write-Host "  Built-in Controls: $($gc.builtInControls -join ', ')" }
+                                if ($gc.customAuthenticationFactors) { Write-Host "  Custom Auth Factors: $($gc.customAuthenticationFactors -join ', ')" }
+                                if ($gc.termsOfUse) { Write-Host "  Terms of Use: $($gc.termsOfUse -join ', ')" }
+                                if ($gc.authenticationStrength) { Write-Host "  Auth Strength: Configured" }
+                            } else {
+                                Write-Host "  None configured"
+                            }
+                            
+                            # Format Session Controls summary
+                            Write-Host "`nSession Controls:" -ForegroundColor Cyan
+                            if ($policy.sessionControls) {
+                                $sc = $policy.sessionControls
+                                if ($sc.applicationEnforcedRestrictions) { Write-Host "  App Enforced Restrictions: Enabled" }
+                                if ($sc.cloudAppSecurity) { Write-Host "  Cloud App Security: Configured" }
+                                if ($sc.persistentBrowser) { Write-Host "  Persistent Browser: Configured" }
+                                if ($sc.signInFrequency) { Write-Host "  Sign-in Frequency: Configured" }
+                            } else {
+                                Write-Host "  None configured"
+                            }
                         }
                     }
                 }
@@ -67,21 +148,44 @@ function Start-ConditionalAccessManagerConsole {
             "3" {
                 Write-Host "`nRestore Policy" -ForegroundColor Yellow
                 try {
-                    $policies = Get-DeletedConditionalAccessPolicies
-                    if ($policies -and $policies.Count -gt 0) {
-                        Write-Host "`nAvailable policies to restore:"
-                        for ($i = 0; $i -lt $policies.Count; $i++) {
-                            Write-Host "$($i + 1). $($policies[$i].displayName) (ID: $($policies[$i].id))"
+                    # Check authentication and connect if needed
+                    if (-not (Test-GraphAuthentication)) {
+                        return
+                    }
+                    
+                    # Call Graph API directly to get deleted policies
+                    $Uri = 'https://graph.microsoft.com/beta/identity/conditionalAccess/deletedItems/policies'
+                    $response = Invoke-GraphRequest -Uri $Uri -Method GET
+                    $Data = $response.value
+                    
+                    if ($Data) {
+                        Write-Host "`n$($Data.count) soft-deleted conditional access policies found" -ForegroundColor Green
+                        Write-Host ""
+                        
+                        # Create indexed list for selection
+                        $indexedPolicies = @()
+                        for ($i = 0; $i -lt $Data.Count; $i++) {
+                            $indexedPolicies += [PSCustomObject]@{
+                                Index = $i + 1
+                                DisplayName = $Data[$i].displayName
+                                Id = $Data[$i].id
+                                State = $Data[$i].state
+                            }
                         }
                         
-                        $selection = Read-Host "`nEnter policy number to restore (or 'c' to cancel)"
+                        # Display formatted table
+                        $indexedPolicies | Format-Table Index, DisplayName, Id, State -AutoSize
+                        
+                        $selection = Read-Host "Enter policy number to restore (or 'c' to cancel)"
                         if ($selection -eq 'c') {
                             Write-Host "Cancelled" -ForegroundColor Yellow
                         }
-                        elseif ($selection -match '^\d+$' -and [int]$selection -le $policies.Count -and [int]$selection -gt 0) {
-                            $selectedPolicy = $policies[[int]$selection - 1]
-                            $confirm = Read-Host "Restore policy '$($selectedPolicy.displayName)'? (y/N)"
-                            if ($confirm -eq 'y') {
+                        elseif ($selection -match '^\d+$' -and [int]$selection -le $Data.Count -and [int]$selection -gt 0) {
+                            $selectedPolicy = $Data[[int]$selection - 1]
+                            Write-Host "`nSelected policy: $($selectedPolicy.displayName)" -ForegroundColor Cyan
+                            $confirm = Read-Host "Restore this policy? (y/N)"
+                            if ($confirm -eq 'y' -or $confirm -eq 'Y') {
+                                Write-Host "Restoring policy..." -ForegroundColor Yellow
                                 Restore-ConditionalAccessPolicy -PolicyId $selectedPolicy.id
                             }
                             else {
@@ -89,11 +193,11 @@ function Start-ConditionalAccessManagerConsole {
                             }
                         }
                         else {
-                            Write-Host "Invalid selection" -ForegroundColor Red
+                            Write-Host "Invalid selection. Please enter a number between 1 and $($Data.Count), or 'c' to cancel." -ForegroundColor Red
                         }
                     }
                     else {
-                        Write-Host "No deleted policies available to restore" -ForegroundColor Yellow
+                        Write-Host "No soft-deleted conditional access policies found to restore" -ForegroundColor Yellow
                     }
                 }
                 catch {
@@ -104,22 +208,45 @@ function Start-ConditionalAccessManagerConsole {
             "4" {
                 Write-Host "`nPermanently Remove Policy" -ForegroundColor Yellow
                 try {
-                    $policies = Get-DeletedConditionalAccessPolicies
-                    if ($policies -and $policies.Count -gt 0) {
-                        Write-Host "`nAvailable policies to remove:"
-                        for ($i = 0; $i -lt $policies.Count; $i++) {
-                            Write-Host "$($i + 1). $($policies[$i].displayName) (ID: $($policies[$i].id))"
+                    # Check authentication and connect if needed
+                    if (-not (Test-GraphAuthentication)) {
+                        return
+                    }
+                    
+                    # Call Graph API directly to get deleted policies
+                    $Uri = 'https://graph.microsoft.com/beta/identity/conditionalAccess/deletedItems/policies'
+                    $response = Invoke-GraphRequest -Uri $Uri -Method GET
+                    $Data = $response.value
+                    
+                    if ($Data) {
+                        Write-Host "`n$($Data.count) soft-deleted conditional access policies found" -ForegroundColor Green
+                        Write-Host ""
+                        
+                        # Create indexed list for selection
+                        $indexedPolicies = @()
+                        for ($i = 0; $i -lt $Data.Count; $i++) {
+                            $indexedPolicies += [PSCustomObject]@{
+                                Index = $i + 1
+                                DisplayName = $Data[$i].displayName
+                                Id = $Data[$i].id
+                                State = $Data[$i].state
+                            }
                         }
                         
-                        $selection = Read-Host "`nEnter policy number to remove (or 'c' to cancel)"
+                        # Display formatted table
+                        $indexedPolicies | Format-Table Index, DisplayName, Id, State -AutoSize
+                        
+                        $selection = Read-Host "Enter policy number to remove (or 'c' to cancel)"
                         if ($selection -eq 'c') {
                             Write-Host "Cancelled" -ForegroundColor Yellow
                         }
-                        elseif ($selection -match '^\d+$' -and [int]$selection -le $policies.Count -and [int]$selection -gt 0) {
-                            $selectedPolicy = $policies[[int]$selection - 1]
+                        elseif ($selection -match '^\d+$' -and [int]$selection -le $Data.Count -and [int]$selection -gt 0) {
+                            $selectedPolicy = $Data[[int]$selection - 1]
+                            Write-Host "`nSelected policy: $($selectedPolicy.displayName)" -ForegroundColor Cyan
                             Write-Host "WARNING: This will permanently remove the policy and cannot be undone!" -ForegroundColor Red
                             $confirm = Read-Host "Permanently remove policy '$($selectedPolicy.displayName)'? Type 'DELETE' to confirm"
                             if ($confirm -eq 'DELETE') {
+                                Write-Host "Removing policy..." -ForegroundColor Yellow
                                 Remove-DeletedConditionalAccessPolicy -PolicyId $selectedPolicy.id -Force
                             }
                             else {
@@ -127,11 +254,11 @@ function Start-ConditionalAccessManagerConsole {
                             }
                         }
                         else {
-                            Write-Host "Invalid selection" -ForegroundColor Red
+                            Write-Host "Invalid selection. Please enter a number between 1 and $($Data.Count), or 'c' to cancel." -ForegroundColor Red
                         }
                     }
                     else {
-                        Write-Host "No deleted policies available to remove" -ForegroundColor Yellow
+                        Write-Host "No soft-deleted conditional access policies found to remove" -ForegroundColor Yellow
                     }
                 }
                 catch {
